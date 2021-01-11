@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+   db:
+    image: mysql:8.0.22
+    container_name: mysql1
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    environment:
+      - MYSQL_USER=dracula
+      - MYSQL_PASSWORD=abc1234
+      - MYSQL_ROOT_PASSWORD=abc1234
+      - MYSQL_DATABASE=omgimages
+    ports:
+      - 3307:3306
+    volumes:
+      - /Users/gil_l/data/volumes/mysql:/var/lib/mysql

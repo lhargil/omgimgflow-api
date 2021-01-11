@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using API.Data;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
@@ -26,11 +27,12 @@ namespace API.Controllers
     {
         private readonly IFileProvider _fileProvider;
         private readonly ILogger<PhotosController> _logger;
+        private readonly OmgImageServerDbContext _dbContext;
         private readonly string _targetFilePath;
         private readonly long _fileSizeLimit;
         private readonly string[] _permittedExtensions = { ".jpg" };
 
-        public PhotosController(IFileProvider fileProvider, ILogger<PhotosController> logger)
+        public PhotosController(IFileProvider fileProvider, ILogger<PhotosController> logger, OmgImageServerDbContext dbContext)
         {
             _fileProvider = fileProvider;
             _fileSizeLimit = 2097152;
@@ -41,6 +43,7 @@ namespace API.Controllers
                     ? Environment.GetEnvironmentVariable("HOME")
                     : Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%"), "omgimgflow_photos");
             _logger = logger;
+            _dbContext = dbContext;
         }
         // GET: api/<PhotosController>
         [HttpGet]
@@ -93,6 +96,11 @@ namespace API.Controllers
                             "'{TargetFilePath}' as {TrustedFileNameForFileStorage}",
                             trustedFileNameForDisplay, _targetFilePath,
                             trustedFileNameForFileStorage);
+                        var omgImage = new Models.OmgImage(trustedFileNameForDisplay);
+                        omgImage.Description = photoModel.Description;
+                        omgImage.AddTag("First");
+                        _dbContext.OmgImages.Add(omgImage);
+                        await _dbContext.SaveChangesAsync();
                     }
                 }                
             }

@@ -1,21 +1,18 @@
+using API.Data;
+using API.Utilities;
 using Imageflow.Server;
 using Imageflow.Server.HybridCache;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Rewrite;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using MySqlConnector;
+using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace API
 {
@@ -33,9 +30,27 @@ namespace API
         public IConfiguration Configuration { get; }
         public string HomeFolder { get; }
 
+        public void ConfigureEntityFramework(IServiceCollection services)
+        {
+            var connectionString = Configuration.GetConnectionString("OmgImagesServerDb");
+            services.AddDbContextPool<OmgImageServerDbContext>(
+                options => options.UseMySql(
+                    connectionString,
+                    new MySqlServerVersion(new Version(8, 0, 22)),
+                    mysqlOptions =>
+                    {
+                        mysqlOptions.CharSetBehavior(CharSetBehavior.NeverAppend);
+                        mysqlOptions.UseNewtonsoftJson();
+                        mysqlOptions.EnableRetryOnFailure();
+                    }
+            ));
+        }
+
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            ConfigureEntityFramework(services);
+
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowAll",
@@ -66,6 +81,8 @@ namespace API
             var physicalProvider = new PhysicalFileProvider($"{HomeFolder}");
 
             services.AddSingleton<IFileProvider>(physicalProvider);
+
+            services.AddSingleton<IDateTimeManager, DateTimeManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
