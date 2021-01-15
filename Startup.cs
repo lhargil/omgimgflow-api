@@ -102,7 +102,7 @@ namespace API
             app.UseImageflow(new ImageflowMiddlewareOptions()
                 // Maps / to WebRootPath
                 .SetMapWebRoot(false)
-                //.SetMyOpenSourceProjectUrl("https://github.com/imazen/imageflow-dotnet-server")
+                .SetMyOpenSourceProjectUrl("https://github.com/lhargil/omgimgflow-api")
                 // Maps /folder to WebRootPath/folder
                 .MapPath("/photos", Path.Combine(HomeFolder, "omgimgflow_photos"))
                 // Allow HybridCache or other registered IStreamCache to run
