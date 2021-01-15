@@ -1,4 +1,5 @@
 ﻿using API.Data;
+using API.Dtos;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
@@ -47,11 +48,19 @@ namespace API.Controllers
         }
         // GET: api/<PhotosController>
         [HttpGet]
-        public IEnumerable<string> Get()
+        public IEnumerable<PhotoDto> Get()
         {
-            var files = _fileProvider.GetDirectoryContents("omgimgflow_photos");
+            var photos = _dbContext.OmgImages
+                .AsEnumerable()
+                .Select(image =>
+                {
+                    var photoDto = new PhotoDto(image.Id, WebUtility.HtmlDecode($"{image.Filename}").Replace("\"", ""), image.Description);
+                    image.Tags.ToList().ForEach(tag => photoDto.AddTag(tag.Name));
 
-            return files.Select(f => WebUtility.HtmlDecode($"{f.Name}")).ToList();
+                    return photoDto;
+                });
+
+            return photos;
         }
 
         // GET api/<PhotosController>/5
