@@ -17,14 +17,6 @@ using System.Threading.Tasks;
 
 namespace API.Controllers
 {
-    public class PhotoModel
-    {
-        public IFormFile Photo { get; set; }
-        public string Title { get; set; }
-        public string Description { get; set; }
-        public List<string> Tags { get; set; }
-    }
-
     [Route("api/[controller]")]
     [ApiController]
     public class PhotosController : ControllerBase
@@ -75,6 +67,11 @@ namespace API.Controllers
                 .Include(i => i.Tags)
                 .FirstOrDefaultAsync(image => image.Id == id);
 
+            if (null == photo)
+            {
+                throw new NullReferenceException();
+            }
+
             var photoDto = new PhotoDto(photo.Id, WebUtility.HtmlDecode($"{photo.Filename}").Replace("\"", ""), photo.Title, photo.Description);
             photo.Tags.ToList().ForEach(tag => photoDto.AddTag(tag.Name));
 
@@ -121,7 +118,7 @@ namespace API.Controllers
                     });
 
                     _dbContext.OmgImages.Add(omgImage);
-                    await _dbContext.SaveChangesAsync();
+                    await _dbContext.SaveChangesAsync();     
                     await targetStream.WriteAsync(fileContent);
 
                     _logger.LogInformation(
