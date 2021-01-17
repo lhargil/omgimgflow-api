@@ -2,6 +2,7 @@
 using API.Dtos;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using System;
@@ -20,6 +21,7 @@ namespace API.Controllers
     {
         public IFormFile Photo { get; set; }
         public string Description { get; set; }
+        public List<string> Tags { get; set; }
     }
 
     [Route("api/[controller]")]
@@ -51,6 +53,7 @@ namespace API.Controllers
         public IEnumerable<PhotoDto> Get()
         {
             var photos = _dbContext.OmgImages
+                .Include(i => i.Tags)
                 .AsEnumerable()
                 .Select(image =>
                 {
@@ -107,7 +110,12 @@ namespace API.Controllers
                             trustedFileNameForFileStorage);
                         var omgImage = new Models.OmgImage(trustedFileNameForDisplay);
                         omgImage.Description = photoModel.Description;
-                        omgImage.AddTag("First");
+
+                        photoModel.Tags.ForEach(tag =>
+                        {
+                            omgImage.AddTag(tag);
+                        });
+
                         _dbContext.OmgImages.Add(omgImage);
                         await _dbContext.SaveChangesAsync();
                     }
