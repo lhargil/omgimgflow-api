@@ -9,12 +9,14 @@ namespace API.Models
         {
             Tags = new List<OmgImageTag>();
         }
-        public OmgImage(string filename) : this()
+        public OmgImage(string filename, string title) : this()
         {
             Filename = filename;
+            Title = title;
         }
         public Guid Id { get; private set; }
         public string Filename { get; private set; }
+        public string Title { get; set; }
         public string Description { get; set; }
         public ICollection<OmgImageTag> Tags { get; private set; }
 

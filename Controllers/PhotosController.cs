@@ -20,6 +20,7 @@ namespace API.Controllers
     public class PhotoModel
     {
         public IFormFile Photo { get; set; }
+        public string Title { get; set; }
         public string Description { get; set; }
         public List<string> Tags { get; set; }
     }
@@ -57,7 +58,7 @@ namespace API.Controllers
                 .AsEnumerable()
                 .Select(image =>
                 {
-                    var photoDto = new PhotoDto(image.Id, WebUtility.HtmlDecode($"{image.Filename}").Replace("\"", ""), image.Description);
+                    var photoDto = new PhotoDto(image.Id, WebUtility.HtmlDecode($"{image.Filename}").Replace("\"", ""), image.Title, image.Description);
                     image.Tags.ToList().ForEach(tag => photoDto.AddTag(tag.Name));
 
                     return photoDto;
@@ -108,7 +109,7 @@ namespace API.Controllers
                             "'{TargetFilePath}' as {TrustedFileNameForFileStorage}",
                             trustedFileNameForDisplay, _targetFilePath,
                             trustedFileNameForFileStorage);
-                        var omgImage = new Models.OmgImage(trustedFileNameForDisplay);
+                        var omgImage = new Models.OmgImage(trustedFileNameForDisplay, photoModel.Title);
                         omgImage.Description = photoModel.Description;
 
                         photoModel.Tags.ForEach(tag =>

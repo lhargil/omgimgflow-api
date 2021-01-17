@@ -13,15 +13,17 @@ namespace API.Dtos
             Tags = new List<string>();
         }
 
-        public PhotoDto(Guid id, string filename, string description): this()
+        public PhotoDto(Guid id, string filename, string title, string description): this()
         {
             Id = id;
             Filename = filename;
+            Title = title;
             Description = description;
         }
 
         public Guid Id { get; private set; }
         public string Filename { get; private set; }
+        public string Title { get; set; }
         public string Description { get; private set; }
         public List<string> Tags { get; private set; }
 

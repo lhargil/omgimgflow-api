@@ -9,7 +9,11 @@ namespace API.Data.Configurations
         {
             builder.Property(p => p.Id).ValueGeneratedOnAdd();
             builder
-                .Property(b => b.Filename)
+                .Property(p => p.Filename)
+                .IsRequired();
+
+            builder
+                .Property(p => p.Title)
                 .IsRequired();
 
             base.Configure(builder);
