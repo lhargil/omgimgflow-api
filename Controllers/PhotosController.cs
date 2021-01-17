@@ -218,8 +218,34 @@ namespace API.Controllers
 
         // DELETE api/<PhotosController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<ActionResult> Delete(Guid id)
         {
+
+            try
+            {
+                var omgImage = await _dbContext.OmgImages
+                    .Include(i => i.Tags)
+                    .FirstOrDefaultAsync(image => image.Id == id);
+
+                if (null == omgImage)
+                {
+                    throw new NullReferenceException();
+                }
+
+                _dbContext.RemoveRange(omgImage.Tags);
+                _dbContext.OmgImages.Remove(omgImage);
+
+                await _dbContext.SaveChangesAsync();
+
+                var filename = omgImage.Filename.Replace("\"", "");
+                System.IO.File.Delete(Path.Combine(_targetFilePath, filename));
+            }
+            catch (IOException ioException)
+            {
+                Console.WriteLine(ioException.Message);
+            }
+
+            return NoContent();
         }
     }
 }
