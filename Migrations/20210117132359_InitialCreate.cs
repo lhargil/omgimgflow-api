@@ -14,6 +14,7 @@ namespace API.Migrations
                 {
                     Id = table.Column<Guid>(type: "char(36)", nullable: false),
                     Filename = table.Column<string>(type: "longtext", nullable: false),
+                    Title = table.Column<string>(type: "longtext", nullable: false),
                     Description = table.Column<string>(type: "longtext", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP(6)"),
                     DateModified = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP(6)"),

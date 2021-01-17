@@ -69,9 +69,16 @@ namespace API.Controllers
 
         // GET api/<PhotosController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public async Task<ActionResult<PhotoDto>> Get(Guid id)
         {
-            return "value";
+            var photo = await _dbContext.OmgImages
+                .Include(i => i.Tags)
+                .FirstOrDefaultAsync(image => image.Id == id);
+
+            var photoDto = new PhotoDto(photo.Id, WebUtility.HtmlDecode($"{photo.Filename}").Replace("\"", ""), photo.Title, photo.Description);
+            photo.Tags.ToList().ForEach(tag => photoDto.AddTag(tag.Name));
+
+            return photoDto;
         }
 
         // POST api/<PhotosController>
@@ -90,7 +97,7 @@ namespace API.Controllers
                     trustedFileNameForDisplay = WebUtility.HtmlEncode(
                                 contentDisposition.FileName);
 
-                    var trustedFileNameForFileStorage = contentDisposition.FileName; // Path.GetRandomFileName();
+                    var trustedFileNameForFileStorage = contentDisposition.FileName;
 
                     var fileContent = await FileHelpers.ProcessFormFile<IFormFile>(photoModel.Photo, ModelState, _permittedExtensions, _fileSizeLimit);
 
@@ -99,39 +106,114 @@ namespace API.Controllers
                         return BadRequest(ModelState);
                     }
 
-                    using (var targetStream = System.IO.File.Create(
-                                Path.Combine(_targetFilePath, trustedFileNameForFileStorage.Replace("\"", ""))))
+                    using var targetStream = System.IO.File.Create(
+                                Path.Combine(_targetFilePath, trustedFileNameForFileStorage.Replace("\"", "")));
+
+
+                    var omgImage = new Models.OmgImage(trustedFileNameForDisplay, photoModel.Title)
                     {
-                        await targetStream.WriteAsync(fileContent);
+                        Description = photoModel.Description
+                    };
 
-                        _logger.LogInformation(
-                            "Uploaded file '{TrustedFileNameForDisplay}' saved to " +
-                            "'{TargetFilePath}' as {TrustedFileNameForFileStorage}",
-                            trustedFileNameForDisplay, _targetFilePath,
-                            trustedFileNameForFileStorage);
-                        var omgImage = new Models.OmgImage(trustedFileNameForDisplay, photoModel.Title);
-                        omgImage.Description = photoModel.Description;
+                    photoModel.Tags.ForEach(tag =>
+                    {
+                        omgImage.AddTag(tag);
+                    });
 
-                        photoModel.Tags.ForEach(tag =>
-                        {
-                            omgImage.AddTag(tag);
-                        });
+                    _dbContext.OmgImages.Add(omgImage);
+                    await _dbContext.SaveChangesAsync();
+                    await targetStream.WriteAsync(fileContent);
 
-                        _dbContext.OmgImages.Add(omgImage);
-                        await _dbContext.SaveChangesAsync();
-                    }
-                }                
+                    _logger.LogInformation(
+                        "Uploaded file '{TrustedFileNameForDisplay}' saved to " +
+                        "'{TargetFilePath}' as {TrustedFileNameForFileStorage}",
+                        trustedFileNameForDisplay, _targetFilePath,
+                        trustedFileNameForFileStorage);
+
+                    return CreatedAtAction(nameof(this.Get), new { id = omgImage.Id }, omgImage);
+                }
             }
-            // Process uploaded files
-            // Don't rely on or trust the FileName property without validation.
 
-            return Ok();
+            return BadRequest();
         }
 
         // PUT api/<PhotosController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public async Task<ActionResult> Put(Guid id, [FromBody] PhotoModel photoModel)
         {
+            var trustedFileNameForDisplay = "";
+            if (photoModel.Photo != null && photoModel.Photo.Length > 0)
+            {
+                var hasContentDispositionHeader =
+                    ContentDispositionHeaderValue.TryParse(
+                        photoModel.Photo.ContentDisposition, out var contentDisposition);
+
+                if (hasContentDispositionHeader)
+                {
+                    trustedFileNameForDisplay = WebUtility.HtmlEncode(
+                                contentDisposition.FileName);
+
+                    var trustedFileNameForFileStorage = contentDisposition.FileName;
+
+                    var fileContent = await FileHelpers.ProcessFormFile<IFormFile>(photoModel.Photo, ModelState, _permittedExtensions, _fileSizeLimit);
+
+                    if (!ModelState.IsValid)
+                    {
+                        return BadRequest(ModelState);
+                    }
+
+                    using var targetStream = System.IO.File.Create(
+                                Path.Combine(_targetFilePath, trustedFileNameForFileStorage.Replace("\"", "")));
+
+
+                    await targetStream.WriteAsync(fileContent);
+
+                    _logger.LogInformation(
+                        "Uploaded file '{TrustedFileNameForDisplay}' saved to " +
+                        "'{TargetFilePath}' as {TrustedFileNameForFileStorage}",
+                        trustedFileNameForDisplay, _targetFilePath,
+                        trustedFileNameForFileStorage);
+                }
+
+            }
+
+
+            var omgImage = await _dbContext.OmgImages
+                .Include(image => image.Tags)
+                .FirstOrDefaultAsync(image => image.Id == id);
+
+            if (omgImage == null)
+            {
+                throw new NullReferenceException();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            omgImage.Title = photoModel.Title;
+            omgImage.Description = photoModel.Description;
+
+            var tagsToRemove = omgImage.Tags.Where(tag => !photoModel.Tags.Contains(tag.Name)).ToList();
+
+            tagsToRemove.ForEach(tag =>
+                _dbContext.Entry(tag).State = EntityState.Deleted
+            );
+
+            photoModel.Tags.ForEach(tagToAdd =>
+            {
+                if (!omgImage.Tags.Any(tag => tag.Name.ToLower() == tagToAdd.ToLower()))
+                {
+                    omgImage.AddTag(tagToAdd);
+                }
+            });
+
+            await _dbContext.SaveChangesAsync();
+
+            _logger.LogInformation("Updated image");
+
+            return NoContent();
         }
 
         // DELETE api/<PhotosController>/5

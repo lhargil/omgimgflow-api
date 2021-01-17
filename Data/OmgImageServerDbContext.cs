@@ -33,9 +33,9 @@ namespace API.Data
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             foreach (var entry in ChangeTracker.Entries()
-        .Where(e => e.State == EntityState.Added ||
-        e.State == EntityState.Modified ||
-        e.State == EntityState.Deleted))
+                .Where(e => e.State == EntityState.Added ||
+                e.State == EntityState.Modified ||
+                e.State == EntityState.Deleted))
             {
                 var today = _dateTimeManager.Today;
 

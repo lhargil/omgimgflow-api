@@ -18,16 +18,20 @@ namespace API.Models
         public string Filename { get; private set; }
         public string Title { get; set; }
         public string Description { get; set; }
-        public ICollection<OmgImageTag> Tags { get; private set; }
+        public List<OmgImageTag> Tags { get; private set; }
 
         public void AddTag(string tag)
         {
             Tags.Add(new OmgImageTag(tag));
         }
 
-        public void RemoveTag(string tag)
+        public void RemoveTag(Predicate<OmgImageTag> filterExpression)
         {
-            Tags.Remove(new OmgImageTag(tag));
+            Tags.RemoveAll(filterExpression);
+        }
+        public void RemoveTag(string tagToRemove)
+        {
+            RemoveTag(tag => tag.Name == tagToRemove);
         }
     }
 
