@@ -4,11 +4,13 @@ using Imageflow.Server;
 using Imageflow.Server.HybridCache;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
 using MySqlConnector;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using System;
@@ -62,7 +64,35 @@ namespace API
                                   });
             });
 
+            services.Configure<RouteOptions>(options =>
+            {
+                options.LowercaseUrls = true;
+                options.LowercaseQueryStrings = true;
+            });
+
             services.AddControllers();
+
+            // Register the Swagger generator, defining 1 or more Swagger documents
+            services.AddSwaggerGen(c => {
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Version = "v1",
+                    Title = "OmgImgFlow Image Server API",
+                    Description = "OmgImgFlow Image Server API",
+                    Contact = new OpenApiContact
+                    {
+                        Name = "Lhar Gil",
+                        Email = string.Empty,
+                        Url = new Uri("https://github.com/lhargil"),
+                    },
+                    License = new OpenApiLicense
+                    {
+                        Name = "GNU Affero General Public License v3.0",
+                        Url = new Uri("https://github.com/lhargil/omgimgflow-api/blob/main/LICENSE"),
+                    }
+                });
+            });
+
             // You can add a hybrid cache (in-memory persisted database for tracking filenames, but files used for bytes)
             // But remember to call ImageflowMiddlewareOptions.SetAllowCaching(true) for it to take effect
             // If you're deploying to azure, provide a disk cache folder *not* inside ContentRootPath
@@ -122,6 +152,17 @@ namespace API
                     .SetCommand("mode", "max")));
 
             app.UseStaticFiles();
+
+            // Enable middleware to serve generated Swagger as a JSON endpoint.
+            app.UseSwagger();
+
+            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
+            // specifying the Swagger JSON endpoint.
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "OmgImgFlow Image Server API");
+                c.RoutePrefix = string.Empty;
+            });
 
             app.UseRouting();
 
