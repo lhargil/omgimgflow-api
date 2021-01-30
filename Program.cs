@@ -22,8 +22,11 @@ namespace API
                 try
                 {
                     var services = scope.ServiceProvider;
+                    var omgImageServerDb = services.GetService<OmgImageServerDbContext>();
                     var omgImageServerDbContext = services.GetService<OmgImageServerDbContext>();
                     omgImageServerDbContext.Database.Migrate();
+
+                    DataSeeder.Seed(omgImageServerDb);
                 }
                 catch (Exception ex)
                 {
