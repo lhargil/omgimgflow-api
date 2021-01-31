@@ -134,7 +134,7 @@ namespace API
                 .SetMapWebRoot(false)
                 .SetMyOpenSourceProjectUrl("https://github.com/lhargil/omgimgflow-api")
                 // Maps /folder to WebRootPath/folder
-                .MapPath("/photos", Path.Combine(HomeFolder, "omgimgflow_photos"))
+                .MapPath("/omgimages", Path.Combine(HomeFolder, "omgimgflow_photos"))
                 // Allow HybridCache or other registered IStreamCache to run
                 .SetAllowCaching(true)
                 // Cache publicly (including on shared proxies and CDNs) for 30 days
