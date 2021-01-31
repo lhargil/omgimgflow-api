@@ -14,7 +14,7 @@ namespace API
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public async static Task Main(string[] args)
         {
             var host = CreateHostBuilder(args).Build();
             using (var scope = host.Services.CreateScope())
@@ -22,11 +22,10 @@ namespace API
                 try
                 {
                     var services = scope.ServiceProvider;
-                    var omgImageServerDb = services.GetService<OmgImageServerDbContext>();
                     var omgImageServerDbContext = services.GetService<OmgImageServerDbContext>();
                     omgImageServerDbContext.Database.Migrate();
 
-                    DataSeeder.Seed(omgImageServerDb);
+                    await DataSeeder.Seed(omgImageServerDbContext);
                 }
                 catch (Exception ex)
                 {

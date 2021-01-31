@@ -9,7 +9,7 @@ namespace API
 {
     public class DataSeeder
     {
-        public async static void Seed(OmgImageServerDbContext omgImageServerDb)
+        public async static Task Seed(OmgImageServerDbContext omgImageServerDb)
         {
             if (!omgImageServerDb.OmgImages.Any())
             {
