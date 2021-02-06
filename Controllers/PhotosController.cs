@@ -136,7 +136,7 @@ namespace API.Controllers
 
         // PUT api/<PhotosController>/5
         [HttpPut("{id}")]
-        public async Task<ActionResult> Put(Guid id, [FromBody] PhotoModel photoModel)
+        public async Task<ActionResult> Put(Guid id, [FromForm] PhotoModel photoModel)
         {
             var trustedFileNameForDisplay = "";
             if (photoModel.Photo != null && photoModel.Photo.Length > 0)
@@ -191,6 +191,11 @@ namespace API.Controllers
 
             omgImage.Title = photoModel.Title;
             omgImage.Description = photoModel.Description;
+            
+            if (!String.IsNullOrEmpty(trustedFileNameForDisplay))
+            {
+                omgImage.SetFilename(trustedFileNameForDisplay);
+            }
 
             var tagsToRemove = omgImage.Tags.Where(tag => !photoModel.Tags.Contains(tag.Name)).ToList();
 
