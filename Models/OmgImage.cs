@@ -33,6 +33,11 @@ namespace API.Models
         {
             RemoveTag(tag => tag.Name == tagToRemove);
         }
+
+        public void SetFilename(string filename)
+        {
+            Filename = filename;
+        }
     }
 
     public class OmgImageTag
