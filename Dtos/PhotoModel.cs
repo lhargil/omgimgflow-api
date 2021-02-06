@@ -12,5 +12,9 @@ namespace API.Dtos
         public string Title { get; set; }
         public string Description { get; set; }
         public List<string> Tags { get; set; }
+        public PhotoModel()
+        {
+            Tags = new List<string>();
+        }
     }
 }
