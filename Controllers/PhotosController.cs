@@ -50,7 +50,7 @@ namespace API.Controllers
                 .AsEnumerable()
                 .Select(image =>
                 {
-                    var photoDto = new PhotoDto(image.Id, WebUtility.HtmlDecode($"{image.Filename}").Replace("\"", ""), image.Title, image.Description);
+                    var photoDto = new PhotoDto(image.Id, WebUtility.HtmlDecode($"{image.Filename}").Replace("\"", ""), image.Title, image.Description, image.Width, image.Height);
                     image.Tags.ToList().ForEach(tag => photoDto.AddTag(tag.Name));
 
                     return photoDto;
@@ -72,7 +72,7 @@ namespace API.Controllers
                 throw new NullReferenceException();
             }
 
-            var photoDto = new PhotoDto(photo.Id, WebUtility.HtmlDecode($"{photo.Filename}").Replace("\"", ""), photo.Title, photo.Description);
+            var photoDto = new PhotoDto(photo.Id, WebUtility.HtmlDecode($"{photo.Filename}").Replace("\"", ""), photo.Title, photo.Description, photo.Width, photo.Height);
             photo.Tags.ToList().ForEach(tag => photoDto.AddTag(tag.Name));
 
             return photoDto;
@@ -107,7 +107,7 @@ namespace API.Controllers
                                 Path.Combine(_targetFilePath, trustedFileNameForFileStorage.Replace("\"", "")));
 
 
-                    var omgImage = new Models.OmgImage(trustedFileNameForDisplay, photoModel.Title)
+                    var omgImage = new Models.OmgImage(trustedFileNameForDisplay, photoModel.Title, 0, 0)
                     {
                         Description = photoModel.Description
                     };
