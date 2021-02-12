@@ -1,5 +1,6 @@
 ﻿using API.Data;
 using API.Dtos;
+using ImageMagick;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -103,11 +104,10 @@ namespace API.Controllers
                         return BadRequest(ModelState);
                     }
 
-                    using var targetStream = System.IO.File.Create(
-                                Path.Combine(_targetFilePath, trustedFileNameForFileStorage.Replace("\"", "")));
+                    var filePath = Path.Combine(_targetFilePath, trustedFileNameForFileStorage.Replace("\"", ""));
+                    using var image = new MagickImage(fileContent);
 
-
-                    var omgImage = new Models.OmgImage(trustedFileNameForDisplay, photoModel.Title, 0, 0)
+                    var omgImage = new Models.OmgImage(trustedFileNameForDisplay, photoModel.Title, image.Width, image.Height)
                     {
                         Description = photoModel.Description
                     };
@@ -118,8 +118,8 @@ namespace API.Controllers
                     });
 
                     _dbContext.OmgImages.Add(omgImage);
-                    await _dbContext.SaveChangesAsync();     
-                    await targetStream.WriteAsync(fileContent);
+                    await _dbContext.SaveChangesAsync();
+                    image.Write(filePath);
 
                     _logger.LogInformation(
                         "Uploaded file '{TrustedFileNameForDisplay}' saved to " +
@@ -139,6 +139,8 @@ namespace API.Controllers
         public async Task<ActionResult> Put(Guid id, [FromForm] PhotoModel photoModel)
         {
             var trustedFileNameForDisplay = "";
+            var imageWidth = 0;
+            var imageHeight = 0;
             if (photoModel.Photo != null && photoModel.Photo.Length > 0)
             {
                 var hasContentDispositionHeader =
@@ -159,11 +161,12 @@ namespace API.Controllers
                         return BadRequest(ModelState);
                     }
 
-                    using var targetStream = System.IO.File.Create(
-                                Path.Combine(_targetFilePath, trustedFileNameForFileStorage.Replace("\"", "")));
+                    var filePath = Path.Combine(_targetFilePath, trustedFileNameForFileStorage.Replace("\"", ""));
+                    using var image = new MagickImage(fileContent);
+                    imageWidth = image.Width;
+                    imageHeight = image.Height;
 
-
-                    await targetStream.WriteAsync(fileContent);
+                    image.Write(filePath);
 
                     _logger.LogInformation(
                         "Uploaded file '{TrustedFileNameForDisplay}' saved to " +
@@ -195,6 +198,10 @@ namespace API.Controllers
             if (!String.IsNullOrEmpty(trustedFileNameForDisplay))
             {
                 omgImage.SetFilename(trustedFileNameForDisplay);
+            }
+
+            if (imageWidth != 0 && imageHeight != 0) {
+                omgImage.SetDimension(imageWidth, imageHeight);
             }
 
             var tagsToRemove = omgImage.Tags.Where(tag => !photoModel.Tags.Contains(tag.Name)).ToList();

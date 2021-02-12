@@ -42,6 +42,12 @@ namespace API.Models
         {
             Filename = filename;
         }
+
+        public void SetDimension(int width, int height)
+        {
+            Width = width;
+            Height = height;
+        }
     }
 
     public class OmgImageTag
