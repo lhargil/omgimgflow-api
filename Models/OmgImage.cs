@@ -9,15 +9,19 @@ namespace API.Models
         {
             Tags = new List<OmgImageTag>();
         }
-        public OmgImage(string filename, string title) : this()
+        public OmgImage(string filename, string title, int width, int height) : this()
         {
             Filename = filename;
             Title = title;
+            Width = width;
+            Height = height;
         }
         public Guid Id { get; private set; }
         public string Filename { get; private set; }
         public string Title { get; set; }
         public string Description { get; set; }
+        public int Width { get; private set; }
+        public int Height { get; private set; }
         public List<OmgImageTag> Tags { get; private set; }
 
         public void AddTag(string tag)
@@ -37,6 +41,12 @@ namespace API.Models
         public void SetFilename(string filename)
         {
             Filename = filename;
+        }
+
+        public void SetDimension(int width, int height)
+        {
+            Width = width;
+            Height = height;
         }
     }
 

@@ -13,19 +13,19 @@ namespace API
         {
             if (!omgImageServerDb.OmgImages.Any())
             {
-                var omgImage1 = new OmgImage("light-em-up.jpg", "Lightning over KL Skyline");
+                var omgImage1 = new OmgImage("light-em-up.jpg", "Lightning over KL Skyline", 1080, 608);
                 omgImage1.Description = "This is a great lightning photo over Kuala Lumpur";
 
-                var omgImage2 = new OmgImage("bantayan-island.jpg", "Bantayan Island port");
+                var omgImage2 = new OmgImage("bantayan-island.jpg", "Bantayan Island port", 720, 1080);
                 omgImage2.Description = "Bantayan island port during sunset";
                 omgImage2.AddTag("colorful");
 
-                var omgImage3 = new OmgImage("Instagram-20140928-2.jpg", "Jump shot");
+                var omgImage3 = new OmgImage("Instagram-20140928-2.jpg", "Jump shot", 1080, 1080);
                 omgImage3.Description = "Jump shot of a group of people";
                 omgImage3.AddTag("tag 1");
                 omgImage3.AddTag("tag 2");
 
-                var omgImage4 = new OmgImage("the-exchange-106-3.jpg", "The Exchange 106");
+                var omgImage4 = new OmgImage("the-exchange-106-3.jpg", "The Exchange 106", 1080, 608);
                 omgImage4.Description = "The Exchange 106 during twilight";
                 omgImage4.AddTag("colorful");
                 omgImage4.AddTag("twilight");
