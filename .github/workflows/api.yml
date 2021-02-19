@@ -55,5 +55,31 @@ jobs:
           # Destination path
           path: omgimgflow-api
       - name: Create the temp directory
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.LHARGIL_VPS_HOST }}
+          username: ${{ secrets.LHARGIL_VPS_DEPLOYER_USERNAME }}
+          password: ${{ secrets.LHARGIL_VPS_DEPLOYER_PW }}
+          port: ${{ secrets.LHARGIL_VPS_DEPLOYER_PORT }}
+          script: mkdir -p ${{ secrets.OMGIMGFLOW_API_TEMP_DEST}}
       - name: Transfer the built files to the temp directory
+        uses: appleboy/scp-action@v0.1.1
+        with:
+          host: ${{ secrets.LHARGIL_VPS_HOST }}
+          username: ${{ secrets.LHARGIL_VPS_DEPLOYER_USERNAME }}
+          password: ${{ secrets.LHARGIL_VPS_DEPLOYER_PW }}
+          port: ${{ secrets.LHARGIL_VPS_DEPLOYER_PORT }}
+          source: "omgimgflow-api"
+          target: ${{ secrets.OMGIMGFLOW_API_TEMP_DEST}}
       - name: Actually deploy and restart api service
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.LHARGIL_VPS_HOST }}
+          username: ${{ secrets.LHARGIL_VPS_DEPLOYER_USERNAME }}
+          password: ${{ secrets.LHARGIL_VPS_DEPLOYER_PW }}
+          port: ${{ secrets.LHARGIL_VPS_DEPLOYER_PORT }}
+          script_stop: true
+          script: |
+            cp -r -f ${{ secrets.OMGIMGFLOW_API_TEMP_DEST}}/health-wise-api/* ${{ secrets.OMGIMGFLOW_API_DEST }}
+            rm -rf ${{ secrets.HEALTHWISE_SSH_TEMP_DEST}}/health-wise-api
+            sudo systemctl restart api-omgimageflow.service
