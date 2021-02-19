@@ -31,6 +31,29 @@ jobs:
       uses: actions/upload-artifact@v2.2.2
       with:
         # Artifact name
-        name: 'omgimgflow-api-artifact'
+        name: omgimgflow-api-artifact
         path: ${{ github.workspace }}/api
         retention-days: 1
+  
+  release:
+    name: Release to VPS
+    needs: [build]
+    strategy:
+      matrix:
+        kind: ['linux']
+        include:
+          - kind: linux
+            os: ubuntu-latest
+            target: linux-x64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Download a Build Artifact
+        uses: actions/download-artifact@v2.0.8
+        with:
+          # Artifact name
+          name: omgimgflow-api-artifact
+          # Destination path
+          path: omgimgflow-api
+      - name: Create the temp directory
+      - name: Transfer the built files to the temp directory
+      - name: Actually deploy and restart api service
