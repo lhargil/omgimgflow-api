@@ -80,6 +80,6 @@ jobs:
           port: ${{ secrets.LHARGIL_VPS_DEPLOYER_PORT }}
           script_stop: true
           script: |
-            cp -r -f ${{ secrets.OMGIMGFLOW_API_TEMP_DEST}}/health-wise-api/* ${{ secrets.OMGIMGFLOW_API_DEST }}
-            rm -rf ${{ secrets.HEALTHWISE_SSH_TEMP_DEST}}/health-wise-api
+            cp -r -f ${{ secrets.OMGIMGFLOW_API_TEMP_DEST}}/omgimgflow-api/* ${{ secrets.OMGIMGFLOW_API_DEST }}
+            rm -rf ${{ secrets.HEALTHWISE_SSH_TEMP_DEST}}/omgimgflow-api
             sudo systemctl restart api-omgimageflow.service
