@@ -75,9 +75,10 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.LHARGIL_VPS_HOST }}
-          username: ${{ secrets.LHARGIL_VPS_DEPLOYER_USERNAME }}
-          password: ${{ secrets.LHARGIL_VPS_DEPLOYER_PW }}
           port: ${{ secrets.LHARGIL_VPS_DEPLOYER_PORT }}
+          username: ${{ secrets.LHARGIL_VPS_DEPLOYER_USERNAME }}
+          key: ${{ secrets.LHARGIL_VPS_DEPLOYER_SSH }}
+          passphrase: ${{ secrets.LHARGIL_VPS_DEPLOYER_SSH_KEY }}
           script_stop: true
           script: |
             cp -r -f ${{ secrets.OMGIMGFLOW_API_TEMP_DEST}}/omgimgflow-api/* ${{ secrets.OMGIMGFLOW_API_DEST }}
